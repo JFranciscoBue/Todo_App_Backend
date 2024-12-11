@@ -32,4 +32,13 @@ export class UsersService {
     await this.usersRepository.save(newUser);
     return newUser;
   }
+
+  async allUsers(): Promise<User[]> {
+    const users = await this.usersRepository.find({
+      relations: {
+        todos: true,
+      },
+    });
+    return users;
+  }
 }
