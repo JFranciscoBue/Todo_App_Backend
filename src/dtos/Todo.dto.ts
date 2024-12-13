@@ -6,3 +6,9 @@ export class CreateTodoDto {
   userID: string;
   category: CategoryEnum;
 }
+
+export class UpdateTodoDto {
+  title: string;
+  description: string;
+  category: string;
+}

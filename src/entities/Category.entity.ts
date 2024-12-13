@@ -1,6 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { v7 as uuid } from 'uuid';
-import { CategoryEnum } from '../enums/categories.enum';
 import { Todo } from './Todo.entity';
 
 @Entity({
@@ -12,7 +11,6 @@ export class Category {
 
   @Column({
     nullable: false,
-    enum: CategoryEnum,
   })
   name: string;
 

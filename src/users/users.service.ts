@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from 'src/dtos/User.dto';
 import { User } from 'src/entities/User.entity';
@@ -11,7 +15,7 @@ export class UsersService {
     @InjectRepository(User) private usersRepository: Repository<User>,
   ) {}
 
-  async createUser(user: CreateUserDto) {
+  async createUser(user: CreateUserDto): Promise<User> {
     const { email, fullname, password } = user;
     const userExist = await this.usersRepository.findOne({
       where: { email },
@@ -40,5 +44,37 @@ export class UsersService {
       },
     });
     return users;
+  }
+
+  async changePassword(id: string, newPassword: string): Promise<Object> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException('El usuario no existe');
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    const updatedResult = await this.usersRepository.update(user.id, {
+      password: hashedNewPassword,
+    });
+
+    return {
+      success: 'Contraseña Cambiada Exitosamente!',
+      updatedResult,
+    };
+  }
+
+  async deleteUser(id: string): Promise<Object> {
+    const deletedResult = await this.usersRepository.delete(id);
+
+    if (deletedResult.affected === 0) {
+      throw new NotFoundException('El usuario no existe');
+    }
+
+    return {
+      success: 'Usuario Eliminado Correctamente',
+      deletedResult,
+    };
   }
 }
