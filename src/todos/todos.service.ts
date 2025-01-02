@@ -107,7 +107,7 @@ export class TodosService {
     };
   }
 
-  async updateCategory(id: string, categoryName: string) {
+  async updateCategory(id: string, categoryName: string): Promise<Object> {
     const todo = await this.todosRepository.findOne({
       where: { id },
       relations: { category: true },
@@ -150,7 +150,7 @@ export class TodosService {
     };
   }
 
-  async updateTodo(updateTodo: UpdateTodoDto, id: string) {
+  async updateTodo(updateTodo: UpdateTodoDto, id: string): Promise<Object> {
     const todo = await this.todosRepository.findOne({
       where: { id },
     });

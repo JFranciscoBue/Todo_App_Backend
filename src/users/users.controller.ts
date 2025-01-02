@@ -21,20 +21,6 @@ import { validUserDto } from '../utils/validateDto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('new')
-  @HttpCode(HttpStatus.CREATED)
-  async createUser(@Body() user: CreateUserDto) {
-    if (validUserDto(user)) {
-      const newUser: User = await this.usersService.createUser(user);
-
-      const { password, ...notPassword } = newUser;
-
-      return notPassword;
-    } else {
-      throw new BadRequestException('Todos los campos son obligatorios');
-    }
-  }
-
   @Get('all')
   @HttpCode(HttpStatus.OK)
   async allUsers() {

@@ -5,6 +5,7 @@ import { User } from 'src/entities/User.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { CreateUserDto } from 'src/dtos/User.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,29 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signIn(credentials: LoginDto) {
+  async signUp(data: CreateUserDto): Promise<Object> {
+    const { email } = data;
+    const userExist = await this.usersRepository.findOne({
+      where: { email },
+    });
+
+    if (userExist) {
+      throw new BadRequestException('El correo Electronico ya esta en uso');
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    const newUser = await this.usersRepository.save({
+      ...data,
+      password: hashedPassword,
+    });
+
+    const { password, ...userWithOutPassword } = newUser;
+
+    return userWithOutPassword;
+  }
+
+  async signIn(credentials: LoginDto): Promise<string> {
     const { email, password } = credentials;
     const user = await this.usersRepository.findOne({ where: { email } });
 

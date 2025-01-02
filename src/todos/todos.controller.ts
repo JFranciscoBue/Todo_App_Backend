@@ -45,7 +45,7 @@ export class TodosController {
 
   @Post('add')
   @HttpCode(HttpStatus.CREATED)
-  async addTodo(@Body() todo: CreateTodoDto) {
+  async addTodo(@Body() todo: CreateTodoDto): Promise<Object> {
     const response = await this.todosService.addTodo(todo);
     console.log(response);
 
@@ -61,7 +61,7 @@ export class TodosController {
 
   @Put('status/:id')
   @HttpCode(HttpStatus.OK)
-  async updateStatus(@Param('id', ParseUUIDPipe) id: string) {
+  async updateStatus(@Param('id', ParseUUIDPipe) id: string): Promise<Object> {
     return await this.todosService.updateStatus(id);
   }
 
@@ -69,18 +69,21 @@ export class TodosController {
   async updateCategory(
     @Param('id') id: string,
     @Body() categoryName: UpdateTodoDto,
-  ) {
+  ): Promise<Object> {
     const { category } = categoryName;
     return await this.todosService.updateCategory(id, category);
   }
 
   @Put('update/:id')
-  async updateTodo(@Body() updateTodo: UpdateTodoDto, @Param('id') id: string) {
+  async updateTodo(
+    @Body() updateTodo: UpdateTodoDto,
+    @Param('id') id: string,
+  ): Promise<Object> {
     return await this.todosService.updateTodo(updateTodo, id);
   }
 
   @Delete('delete/:id')
-  async deleteTodo(@Param('id', ParseUUIDPipe) id: string) {
+  async deleteTodo(@Param('id', ParseUUIDPipe) id: string): Promise<Object> {
     return await this.todosService.deleteTodo(id);
   }
 }

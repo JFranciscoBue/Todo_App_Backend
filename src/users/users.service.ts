@@ -15,28 +15,6 @@ export class UsersService {
     @InjectRepository(User) private usersRepository: Repository<User>,
   ) {}
 
-  async createUser(user: CreateUserDto): Promise<User> {
-    const { email, fullname, password } = user;
-    const userExist = await this.usersRepository.findOne({
-      where: { email },
-    });
-
-    if (userExist) {
-      throw new BadRequestException('El correo electronico ya esta en uso');
-    }
-
-    const hashedPass = await bcrypt.hash(password, 10);
-
-    const newUser = this.usersRepository.create({
-      email,
-      fullname,
-      password: hashedPass,
-    });
-
-    await this.usersRepository.save(newUser);
-    return newUser;
-  }
-
   async allUsers(): Promise<User[]> {
     const users = await this.usersRepository.find({
       relations: {
