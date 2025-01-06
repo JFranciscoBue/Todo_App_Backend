@@ -9,9 +9,11 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { TodosService } from './todos.service';
 import { CreateTodoDto, UpdateTodoDto } from 'src/dtos/Todo.dto';
+import { authGuard } from '../guards/auth.guard';
 
 @Controller('todos')
 export class TodosController {
@@ -19,6 +21,7 @@ export class TodosController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(authGuard)
   async userTodos(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<Object[] | string> {
@@ -45,44 +48,41 @@ export class TodosController {
 
   @Post('add')
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(authGuard)
   async addTodo(@Body() todo: CreateTodoDto): Promise<Object> {
-    const response = await this.todosService.addTodo(todo);
-    console.log(response);
-
-    const { user, ...withOutUserData } = response;
-
-    return {
-      title: withOutUserData.title,
-      description: withOutUserData.description,
-      category: withOutUserData.category.name,
-      isDone: withOutUserData.isDone,
-    };
+    return await this.todosService.addTodo(todo);
   }
 
   @Put('status/:id')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(authGuard)
   async updateStatus(@Param('id', ParseUUIDPipe) id: string): Promise<Object> {
     return await this.todosService.updateStatus(id);
   }
 
   @Put('update/category/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(authGuard)
   async updateCategory(
-    @Param('id') id: string,
-    @Body() categoryName: UpdateTodoDto,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() categoryName: string,
   ): Promise<Object> {
-    const { category } = categoryName;
-    return await this.todosService.updateCategory(id, category);
+    return await this.todosService.updateCategory(id, categoryName);
   }
 
   @Put('update/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(authGuard)
   async updateTodo(
     @Body() updateTodo: UpdateTodoDto,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<Object> {
     return await this.todosService.updateTodo(updateTodo, id);
   }
 
   @Delete('delete/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(authGuard)
   async deleteTodo(@Param('id', ParseUUIDPipe) id: string): Promise<Object> {
     return await this.todosService.deleteTodo(id);
   }

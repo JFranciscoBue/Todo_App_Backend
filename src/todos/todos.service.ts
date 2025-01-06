@@ -42,14 +42,16 @@ export class TodosService {
     return todos;
   }
 
-  async addTodo(todo: CreateTodoDto): Promise<Todo> {
+  async addTodo(todo: CreateTodoDto): Promise<Object> {
     const { title, description, category, userID } = todo;
-    const user = await this.usersRepository.findOne({ where: { id: userID } });
-    console.log(user);
+    const userFound = await this.usersRepository.findOne({
+      where: { id: userID },
+    });
+    console.log(userFound);
 
-    console.log(user.id);
+    console.log(userFound.id);
 
-    if (!user) {
+    if (!userFound) {
       throw new BadRequestException('El usuario no existe');
     }
 
@@ -63,14 +65,14 @@ export class TodosService {
       title,
       description,
       category: cat,
-      user,
+      user: userFound,
     });
-
-    console.log(newTodo);
 
     await this.todosRepository.save(newTodo);
 
-    return newTodo;
+    const { user, ...withOutUserData } = newTodo;
+
+    return withOutUserData;
   }
 
   async updateStatus(id: string): Promise<Object> {
@@ -94,17 +96,14 @@ export class TodosService {
     };
   }
 
-  async deleteTodo(id: string): Promise<Object> {
+  async deleteTodo(id: string): Promise<string> {
     const deleteResult = await this.todosRepository.delete(id);
 
     if (deleteResult.affected === 0) {
       throw new NotFoundException('La tarea no existe');
     }
 
-    return {
-      success: 'Tarea eliminada exitosamente',
-      deleteResult,
-    };
+    return 'Tarea eliminada exitosamente';
   }
 
   async updateCategory(id: string, categoryName: string): Promise<Object> {
@@ -112,9 +111,6 @@ export class TodosService {
       where: { id },
       relations: { category: true },
     });
-
-    console.log(todo);
-    console.log(todo.category.id);
 
     if (!todo) {
       throw new NotFoundException('La tarea no existe');
@@ -170,9 +166,13 @@ export class TodosService {
       );
     }
 
+    const updatedTodo = this.todosRepository.findOne({
+      where: { id },
+    });
+
     return {
       success: 'Tarea Actualizada!',
-      updatedResult,
+      updatedTodo,
     };
   }
 }

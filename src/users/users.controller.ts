@@ -13,9 +13,6 @@ import {
   Res,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, ChangePasswordDto } from 'src/dtos/User.dto';
-import { User } from 'src/entities/User.entity';
-import { validUserDto } from '../utils/validateDto';
 
 @Controller('users')
 export class UsersController {
@@ -24,26 +21,16 @@ export class UsersController {
   @Get('all')
   @HttpCode(HttpStatus.OK)
   async allUsers() {
-    const users: User[] = await this.usersService.allUsers();
-
-    if (!users) {
-      return 'No hay Usuarios Registrados en la plataforma';
-    }
-
-    return {
-      message: 'Todos los usuarios',
-      users,
-    };
+    return await this.usersService.allUsers();
   }
 
   @Put('newPassword/:id')
   @HttpCode(HttpStatus.OK)
   async changePassword(
-    @Param('id') id: string,
-    @Body() newPassword: ChangePasswordDto,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() newPassword: string,
   ) {
-    const { password } = newPassword;
-    return await this.usersService.changePassword(id, password);
+    return await this.usersService.changePassword(id, newPassword);
   }
 
   @Delete('delete/:id')

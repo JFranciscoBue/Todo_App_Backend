@@ -15,12 +15,17 @@ export class UsersService {
     @InjectRepository(User) private usersRepository: Repository<User>,
   ) {}
 
-  async allUsers(): Promise<User[]> {
+  async allUsers(): Promise<User[] | string> {
     const users = await this.usersRepository.find({
       relations: {
         todos: true,
       },
     });
+
+    if (!users) {
+      return 'No hay usuario Registrados en la aplicacion';
+    }
+
     return users;
   }
 
