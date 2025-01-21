@@ -4,14 +4,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { log } from 'node:console';
-import { todo } from 'node:test';
 import { CreateTodoDto, UpdateTodoDto } from 'src/dtos/Todo.dto';
 import { Category } from 'src/entities/Category.entity';
 import { Todo } from 'src/entities/Todo.entity';
 import { User } from 'src/entities/User.entity';
-import { CategoryEnum } from 'src/enums/categories.enum';
 import { Repository } from 'typeorm';
+import { validTodoDto } from '../utils/validateDto';
 
 @Injectable()
 export class TodosService {
@@ -43,36 +41,40 @@ export class TodosService {
   }
 
   async addTodo(todo: CreateTodoDto): Promise<Object> {
-    const { title, description, category, userID } = todo;
-    const userFound = await this.usersRepository.findOne({
-      where: { id: userID },
-    });
-    console.log(userFound);
+    if (validTodoDto(todo)) {
+      const { title, description, category, userID } = todo;
+      const userFound = await this.usersRepository.findOne({
+        where: { id: userID },
+      });
+      console.log(userFound);
 
-    console.log(userFound.id);
+      console.log(userFound.id);
 
-    if (!userFound) {
-      throw new BadRequestException('El usuario no existe');
+      if (!userFound) {
+        throw new BadRequestException('El usuario no existe');
+      }
+
+      const cat: Category = this.categoryRepository.create({
+        name: category,
+      });
+
+      await this.categoryRepository.save(cat);
+
+      const newTodo = this.todosRepository.create({
+        title,
+        description,
+        category: cat,
+        user: userFound,
+      });
+
+      await this.todosRepository.save(newTodo);
+
+      const { user, ...withOutUserData } = newTodo;
+
+      return withOutUserData;
+    } else {
+      throw new BadRequestException('Complete todos los campos');
     }
-
-    const cat: Category = this.categoryRepository.create({
-      name: category,
-    });
-
-    await this.categoryRepository.save(cat);
-
-    const newTodo = this.todosRepository.create({
-      title,
-      description,
-      category: cat,
-      user: userFound,
-    });
-
-    await this.todosRepository.save(newTodo);
-
-    const { user, ...withOutUserData } = newTodo;
-
-    return withOutUserData;
   }
 
   async updateStatus(id: string): Promise<Object> {

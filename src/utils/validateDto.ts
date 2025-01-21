@@ -1,3 +1,4 @@
+import { CreateTodoDto } from 'src/dtos/Todo.dto';
 import { CreateUserDto } from 'src/dtos/User.dto';
 
 export const validUserDto = (userDto: CreateUserDto) => {
@@ -8,4 +9,14 @@ export const validUserDto = (userDto: CreateUserDto) => {
   } else {
     return true;
   }
+};
+
+export const validTodoDto = (todoDto: CreateTodoDto) => {
+  const { title, userID, category } = todoDto;
+
+  if (!title || !userID || !category) {
+    return false;
+  }
+
+  return true;
 };
