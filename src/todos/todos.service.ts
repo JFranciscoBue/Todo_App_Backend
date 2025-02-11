@@ -42,36 +42,33 @@ export class TodosService {
 
   async addTodo(todo: CreateTodoDto): Promise<Object> {
     if (validTodoDto(todo)) {
-      const { title, description, category, userID } = todo;
       const userFound = await this.usersRepository.findOne({
-        where: { id: userID },
+        where: { id: todo.userID },
       });
-      console.log(userFound);
-
-      console.log(userFound.id);
 
       if (!userFound) {
         throw new BadRequestException('El usuario no existe');
       }
 
-      const cat: Category = this.categoryRepository.create({
-        name: category,
+      let cat: Category = await this.categoryRepository.findOne({
+        where: { name: todo.category },
       });
 
-      await this.categoryRepository.save(cat);
-
+      if (!cat) {
+        cat = this.categoryRepository.create({ name: todo.category });
+        await this.categoryRepository.save(cat);
+      }
       const newTodo = this.todosRepository.create({
-        title,
-        description,
+        ...todo,
         category: cat,
         user: userFound,
       });
 
       await this.todosRepository.save(newTodo);
 
-      const { user, ...withOutUserData } = newTodo;
+      const { user, ...rest } = newTodo;
 
-      return withOutUserData;
+      return rest;
     } else {
       throw new BadRequestException('Complete todos los campos');
     }
