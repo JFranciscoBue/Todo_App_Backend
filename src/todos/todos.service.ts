@@ -42,7 +42,7 @@ export class TodosService {
 
   async addTodo(todo: CreateTodoDto): Promise<Object> {
     if (validTodoDto(todo)) {
-      const userFound = await this.usersRepository.findOne({
+      const userFound: User = await this.usersRepository.findOne({
         where: { id: todo.userID },
       });
 
